@@ -2,6 +2,7 @@ package com.uniquehire.cafe.serviceimpl;
 
 import com.uniquehire.cafe.dto.OrderDetailsDTO;
 import com.uniquehire.cafe.dto.OrderRequestDTO;
+import com.uniquehire.cafe.dto.OrderResponseDTO;
 import com.uniquehire.cafe.dto.ResponseDTO;
 import com.uniquehire.cafe.model.Order;
 import com.uniquehire.cafe.model.OrderDetails;
@@ -95,12 +96,60 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void getAllOrders() {
+    public List<OrderResponseDTO> getAllOrders() {
+
+        List<Order> orders = orderRepository.findAll();
+        List<OrderResponseDTO> ordersResponse = new ArrayList<>();
+        for(Order order:orders){
+
+            OrderResponseDTO orderResponseDTO=new OrderResponseDTO();
+
+            if(Objects.nonNull(order.getId()))
+                orderResponseDTO.setId(order.getId());
+
+            if(Objects.nonNull(order.getOrderNumber()))
+                orderResponseDTO.setOrderNumber(order.getOrderNumber());
+
+            if(Objects.nonNull(order.getTableName()))
+                orderResponseDTO.setTableName(order.getTableName());
+
+            if(Objects.nonNull(order.getCreatedBy()))
+                orderResponseDTO.setCreatedBy(order.getCreatedBy());
+
+            orderResponseDTO.setCreatedAt(order.getCreatedAt());
+
+            orderResponseDTO.setUpdatedAt(order.getUpdatedAt());
+
+            if(Objects.nonNull(order.getUpdatedBy()))
+                orderResponseDTO.setUpdatedBy(order.getUpdatedBy());
+
+            List<OrderDetailsDTO> orderDetails= new ArrayList<>();
+
+            if(Objects.nonNull(order.getOrderDetails())) {
+                for (OrderDetails details : order.getOrderDetails()) {
+
+                    OrderDetailsDTO orderDetailsDTO = new OrderDetailsDTO();
+
+
+                    orderDetailsDTO.setComments(details.getComments());
+                    orderDetailsDTO.setType(details.getType());
+                    orderDetailsDTO.setPrice(details.getPrice());
+                    orderDetailsDTO.setName(details.getName());
+                    orderDetailsDTO.setQuantity(details.getQuantity());
+                    orderDetailsDTO.setCreatedBy(details.getCreatedBy());
+                    orderDetails.add(orderDetailsDTO);
+                }
+            }
+            orderResponseDTO.setOrderDetails(orderDetails);
+            ordersResponse.add(orderResponseDTO);
+        }
+        return ordersResponse;
+
 
     }
 
     @Override
-    public void getOrderByID(Long id) {
-
+    public OrderResponseDTO getOrderByID(Long id) {
+        return null;
     }
 }
