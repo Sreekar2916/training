@@ -1,5 +1,8 @@
 package com.uniquehire.training.controller;
 
+import com.uniquehire.cafe.dto.OrderRequestDTO;
+import com.uniquehire.cafe.dto.ResponseDTO;
+import com.uniquehire.cafe.service.OrderService;
 import com.uniquehire.training.dto.UserRequestDTO;
 import com.uniquehire.training.dto.UserResponseDTO;
 import com.uniquehire.training.model.User;
@@ -14,8 +17,12 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private OrderService orderService;
+
+
+    public UserController(UserService userService, OrderService orderService) {
         this.userService = userService;
+        this.orderService = orderService;
     }
 
     @PostMapping
@@ -26,5 +33,15 @@ public class UserController {
     @GetMapping
     public List<UserResponseDTO> getUsers() {
         return userService.getAllUsers();
+    }
+
+    @PostMapping("order")
+    public ResponseDTO createOrder(@RequestBody OrderRequestDTO request){
+        System.out.println("Entered to Controller: OrderController,  method(): createOrder");
+        ResponseDTO responseDTO = null;
+        if(request != null){
+            responseDTO = orderService.createOrder(request);
+        }
+        return responseDTO;
     }
 }
