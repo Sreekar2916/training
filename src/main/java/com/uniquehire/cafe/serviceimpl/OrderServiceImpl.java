@@ -106,12 +106,11 @@ public class OrderServiceImpl implements OrderService {
         return responseDTO;
     }
 
-    @Override
-    public List<OrderResponseDTO> getAllOrders(String tableName) {
 
-        List<Order> orders = (tableName != null && !tableName.isBlank())
-                ? orderRepository.findWithTableNameNativeQuery(tableName)
-                : orderRepository.findAll();
+    @Override
+    public List<OrderResponseDTO> getAllOrders() {
+
+        List<Order> orders = orderRepository.findAll();
         return orders.stream()
                 .map(this::mapToOrderResponseDTO)
                 .toList(); // use Collectors.toList() if Java < 16
@@ -148,6 +147,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDTO getOrderByID(Long id) {
+        return null;
+    }
+
+    @Override
+    public OrderResponseDTO getOrderBy(String createdBy) {
         return null;
     }
 }
