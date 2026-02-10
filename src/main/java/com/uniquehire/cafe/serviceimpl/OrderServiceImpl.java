@@ -112,7 +112,6 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orders = (tableName != null && !tableName.isBlank())
                 ? orderRepository.findWithTableNameNativeQuery(tableName)
                 : orderRepository.findAll();
-
         return orders.stream()
                 .map(this::mapToOrderResponseDTO)
                 .toList(); // use Collectors.toList() if Java < 16
@@ -149,30 +148,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDTO getOrderByID(Long id) {
-        OrderResponseDTO responseDTO = new OrderResponseDTO();
-        Optional<Order> order =  orderRepository.findById(id);
-        if(order.isPresent()){
-            responseDTO.setOrderNumber(order.get().getOrderNumber());
-        }
-        responseDTO.setMessage("Success");
-        responseDTO.setStatus(HttpStatus.OK.value());
-        return responseDTO;
-    }
-
-    @Override
-    public OrderResponseDTO getOrderBy(String createdBy) {
-        OrderResponseDTO responseDTO = new OrderResponseDTO();
-        Optional<Order> order = orderRepository.findByCreatedBy(createdBy);
-
-        if(order.isPresent()){
-            responseDTO.setStatus(HttpStatus.OK.value());
-            responseDTO.setMessage("Success");
-            responseDTO.setOrderNumber(order.get().getOrderNumber());
-        }else{
-            responseDTO.setStatus(HttpStatus.NO_CONTENT.value());
-            responseDTO.setMessage("No Data Available with createBy "+createdBy);
-        }
-
-        return responseDTO;
+        return null;
     }
 }
