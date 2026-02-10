@@ -32,7 +32,7 @@ public class OrderController {
 
     @GetMapping("/getOrders")
     public List<OrderResponseDTO> getAllOrders(@RequestParam String tableName){
-        List<OrderResponseDTO> responseDTOS =  orderService.getAllOrders(tableName);
+        List<OrderResponseDTO> responseDTOS =  orderService.getAllOrders();
         return  responseDTOS;
     }
 

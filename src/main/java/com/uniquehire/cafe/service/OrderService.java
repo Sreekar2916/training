@@ -11,4 +11,6 @@ public interface OrderService {
     public ResponseDTO createOrder(OrderRequestDTO request);
     public List<OrderResponseDTO> getAllOrders();
     public OrderResponseDTO getOrderByID(Long id);
+
+    OrderResponseDTO getOrderBy(String createdBy);
 }
