@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface OrderService {
     public ResponseDTO createOrder(OrderRequestDTO request);
-    public List<OrderResponseDTO> getAllOrders(String tableName);
+    public List<OrderResponseDTO> getAllOrders();
     public OrderResponseDTO getOrderByID(Long id);
-
-    OrderResponseDTO getOrderBy(String createdBy);
 }
