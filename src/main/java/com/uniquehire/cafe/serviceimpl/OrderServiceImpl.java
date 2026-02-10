@@ -2,14 +2,18 @@ package com.uniquehire.cafe.serviceimpl;
 
 import com.uniquehire.cafe.dto.OrderDetailsDTO;
 import com.uniquehire.cafe.dto.OrderRequestDTO;
+import com.uniquehire.cafe.dto.OrderResponseDTO;
 import com.uniquehire.cafe.dto.ResponseDTO;
+import com.uniquehire.cafe.model.AuditLog;
 import com.uniquehire.cafe.model.Order;
 import com.uniquehire.cafe.model.OrderDetails;
+import com.uniquehire.cafe.repository.AuditLogRepository;
 import com.uniquehire.cafe.repository.OrderRepository;
 import com.uniquehire.cafe.service.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.Repository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -26,8 +31,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
-    public OrderServiceImpl(OrderRepository orderRepository){
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+    public OrderServiceImpl(OrderRepository orderRepository, AuditLogRepository auditLogRepository){
         this.orderRepository = orderRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     @Override
@@ -85,6 +93,10 @@ public class OrderServiceImpl implements OrderService {
                 responseDTO.setMessage("OrderCreated Successfully");
                 responseDTO.setStatus(HttpStatus.CREATED.value());
             }
+            AuditLog auditLog = new AuditLog();
+            auditLog.setId(order.getId());
+            auditLog.setTableName("Orders");
+            auditLogRepository.save(auditLog);
 
         }catch (Exception e){
             responseDTO.setMessage("OrderCreated Failure");
@@ -95,12 +107,72 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void getAllOrders() {
+    public List<OrderResponseDTO> getAllOrders(String tableName) {
 
+        List<Order> orders = (tableName != null && !tableName.isBlank())
+                ? orderRepository.findWithTableNameNativeQuery(tableName)
+                : orderRepository.findAll();
+
+        return orders.stream()
+                .map(this::mapToOrderResponseDTO)
+                .toList(); // use Collectors.toList() if Java < 16
+    }
+
+    private OrderResponseDTO mapToOrderResponseDTO(Order order) {
+        OrderResponseDTO dto = new OrderResponseDTO();
+        dto.setId(order.getId());
+        dto.setOrderNumber(order.getOrderNumber());
+        dto.setTableName(order.getTableName());
+        dto.setCreatedBy(order.getCreatedBy());
+
+        List<OrderDetailsDTO> details = order.getOrderDetails() == null
+                ? List.of()
+                : order.getOrderDetails().stream()
+                .map(this::mapToOrderDetailsDTO)
+                .toList();
+
+        dto.setOrderDetails(details);
+        return dto;
+    }
+
+    private OrderDetailsDTO mapToOrderDetailsDTO(OrderDetails detail) {
+        OrderDetailsDTO dto = new OrderDetailsDTO();
+        dto.setName(detail.getName());
+        dto.setType(detail.getType());
+        dto.setPrice(detail.getPrice());
+        dto.setQuantity(detail.getQuantity());
+        dto.setComments(detail.getComments());
+        dto.setCreatedBy(detail.getCreatedBy());
+        return dto;
+    }
+
+
+    @Override
+    public OrderResponseDTO getOrderByID(Long id) {
+        OrderResponseDTO responseDTO = new OrderResponseDTO();
+        Optional<Order> order =  orderRepository.findById(id);
+        if(order.isPresent()){
+            responseDTO.setOrderNumber(order.get().getOrderNumber());
+        }
+        responseDTO.setMessage("Success");
+        responseDTO.setStatus(HttpStatus.OK.value());
+        return responseDTO;
     }
 
     @Override
-    public void getOrderByID(Long id) {
+    public OrderResponseDTO getOrderBy(String createdBy) {
+        OrderResponseDTO responseDTO = new OrderResponseDTO();
+        Optional<Order> order = orderRepository.findByCreatedBy(createdBy);
 
+        if(order.isPresent()){
+            responseDTO.setStatus(HttpStatus.OK.value());
+            responseDTO.setMessage("Success");
+            responseDTO.setOrderNumber(order.get().getOrderNumber());
+        }else{
+            responseDTO.setStatus(HttpStatus.NO_CONTENT.value());
+            responseDTO.setMessage("No Data Available with createBy "+createdBy);
+        }
+
+        return responseDTO;
     }
 }

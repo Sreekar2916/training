@@ -1,11 +1,14 @@
 package com.uniquehire.cafe.controller;
 
 import com.uniquehire.cafe.dto.OrderRequestDTO;
+import com.uniquehire.cafe.dto.OrderResponseDTO;
 import com.uniquehire.cafe.dto.ResponseDTO;
 import com.uniquehire.cafe.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,12 +31,20 @@ public class OrderController {
     }
 
     @GetMapping("/getOrders")
-    public void getAllOrders(){
-
+    public List<OrderResponseDTO> getAllOrders(@RequestParam String tableName){
+        List<OrderResponseDTO> responseDTOS =  orderService.getAllOrders(tableName);
+        return  responseDTOS;
     }
 
     @GetMapping("/getOrders/{id}")
-    public void getOrderByID(@PathVariable Long id){
+    public OrderResponseDTO getOrderByID(@PathVariable Long id){
+        OrderResponseDTO response = orderService.getOrderByID(id);
+        return  response;
+    }
 
+    @GetMapping("/getOrders/by")
+    public OrderResponseDTO getOrderBy(@RequestParam String createdBy){
+        OrderResponseDTO response = orderService.getOrderBy(createdBy);
+        return  response;
     }
 }
